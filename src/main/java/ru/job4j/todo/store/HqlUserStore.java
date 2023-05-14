@@ -38,7 +38,11 @@ public class HqlUserStore implements UserStore {
         try {
             session.beginTransaction();
             rsl = session
-                    .createQuery("from User as u where u.login = :fLogin and u.password = :fPassword",
+                    .createQuery("""
+                                    from User as u
+                                    where u.login = :fLogin
+                                    and u.password = :fPassword
+                                    """,
                             User.class)
                     .setParameter("fLogin", login)
                     .setParameter("fPassword", password)
