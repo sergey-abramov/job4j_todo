@@ -18,6 +18,11 @@ public class TaskController {
 
     @GetMapping({"/", "tasks/list"})
     public String getAll(Model model) {
+        var list = service.findAll();
+        if (list.isEmpty()) {
+            model.addAttribute("message", "Задач нет");
+            return "tasks/list";
+        }
         model.addAttribute("tasks", service.findAll());
         return "tasks/list";
     }
@@ -27,10 +32,10 @@ public class TaskController {
         var list = service.findByDone(false);
         if (list.isEmpty()) {
             model.addAttribute("message", "Новых задач нет");
-            return "tasks/list_new";
+            return "tasks/list";
         }
-        model.addAttribute("tasks", service.findByDone(false));
-        return "tasks/list_new";
+        model.addAttribute("tasks", list);
+        return "tasks/list";
     }
 
     @GetMapping("tasks/list_done")
@@ -38,10 +43,10 @@ public class TaskController {
         var list = service.findByDone(true);
         if (list.isEmpty()) {
             model.addAttribute("message", "Выполненных задач нет");
-            return "tasks/list_done";
+            return "tasks/list";
         }
-        model.addAttribute("tasks", service.findByDone(true));
-        return "tasks/list_done";
+        model.addAttribute("tasks", list);
+        return "tasks/list";
     }
 
     @GetMapping("tasks/one/{id}")
@@ -67,8 +72,13 @@ public class TaskController {
 
     @GetMapping("tasks/getUpdate/{id}")
     public String getUpdate(@PathVariable int id, Model model) {
-        model.addAttribute("task", service.findById(id).get());
-        return "tasks/update";
+        var task = service.findById(id);
+        if (task.isPresent()) {
+            model.addAttribute("task", task.get());
+            return "tasks/update";
+        }
+        model.addAttribute("message", "Что-то пошло не так");
+        return "errors/404";
     }
 
     @PostMapping("tasks/update")
