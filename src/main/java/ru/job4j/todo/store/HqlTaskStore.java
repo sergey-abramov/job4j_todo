@@ -1,139 +1,56 @@
 package ru.job4j.todo.store;
 
 import lombok.AllArgsConstructor;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 import ru.job4j.todo.model.Task;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
 @AllArgsConstructor
 public class HqlTaskStore implements TaskStore {
-
-    private final SessionFactory sf;
+    private final CrudStore store;
 
     @Override
     public void create(Task task) {
-        Session session = sf.openSession();
-        try {
-            session.beginTransaction();
-            session.save(task);
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
-        }
+        store.run(session -> session.persist(task));
     }
 
     @Override
     public boolean update(Task task) {
-        Session session = sf.openSession();
-        boolean rsl = false;
-        try {
-            session.beginTransaction();
-            session.update(task);
-            session.getTransaction().commit();
-            rsl = true;
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
-        }
-        return rsl;
+        var task1 = findById(task.getId());
+        return store.booleanRun(session -> !task1.equals(session.merge(task)));
     }
 
     @Override
     public boolean delete(int id) {
-        Session session = sf.openSession();
-        boolean rsl = false;
-        try {
-            session.beginTransaction();
-            rsl = session.createQuery("delete Task where id = :fId")
-                    .setParameter("fId", id)
-                    .executeUpdate() > 0;
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
-        }
-        return rsl;
+       return store.booleanRun("delete from Task where id = :tId",
+               Map.of("tId", id));
     }
 
     @Override
     public List<Task> findAll() {
-        Session session = sf.openSession();
-        List<Task> rsl = new ArrayList<>();
-        try {
-            session.beginTransaction();
-            rsl = session.createQuery("from Task", Task.class)
-                            .list();
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
-        }
-        return rsl;
+        return store.query("from Task", Task.class);
     }
 
     @Override
     public Optional<Task> findById(int id) {
-        Session session = sf.openSession();
-        Optional<Task> rsl = Optional.empty();
-        try {
-            session.beginTransaction();
-            rsl = session.createQuery("from Task where id = :fId", Task.class)
-                    .setParameter("fId", id)
-                    .uniqueResultOptional();
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
-        }
-        return rsl;
+       return store.optional("from Task where id = :fId",
+               Task.class, Map.of("fId", id));
     }
 
     @Override
     public List<Task> findByDone(boolean done) {
-        Session session = sf.openSession();
-       List<Task> rsl = new ArrayList<>();
-        try {
-            session.beginTransaction();
-            rsl = session.createQuery("from Task where done = :fDone", Task.class)
-                    .setParameter("fDone", done)
-                    .list();
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
-        }
-        return rsl;
+       return store.query("from Task where done = :fDone",
+               Task.class, Map.of("fDone", done));
     }
 
     @Override
     public boolean updateDone(int id) {
-        Session session = sf.openSession();
-        boolean rsl = false;
-        try {
-            session.beginTransaction();
-            rsl = session.createQuery("update Task set done = :fDone where id = :fId")
-                    .setParameter("fDone", true)
-                    .setParameter("fId", id)
-                    .executeUpdate() > 0;
-            session.getTransaction().commit();
-        } catch (Exception e) {
-            session.getTransaction().rollback();
-        } finally {
-            session.close();
-        }
-        return rsl;
+        return store.booleanRun("update Task set done = :tDone where id = :tId",
+                Map.of("tDone", true,
+                        "tId", id));
     }
 }
