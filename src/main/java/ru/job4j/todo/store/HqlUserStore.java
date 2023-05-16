@@ -14,9 +14,15 @@ public class HqlUserStore implements UserStore {
     private final CrudStore store;
 
     @Override
-    public boolean save(User user) {
-       store.run(session -> session.persist(user));
-       return findByEmailAndPassword(user.getLogin(), user.getPassword()).isPresent();
+    public Optional<User> save(User user) {
+        Optional<User> rsl;
+        try {
+            store.run(session -> session.persist(user));
+            rsl = Optional.of(user);
+        } catch (Exception e) {
+            rsl = Optional.empty();
+        }
+        return rsl;
     }
 
     @Override
