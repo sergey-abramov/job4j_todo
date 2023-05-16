@@ -23,4 +23,7 @@ public class Task {
     @EqualsAndHashCode.Include
     private boolean done;
     private LocalDateTime created;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }
