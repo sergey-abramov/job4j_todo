@@ -32,7 +32,7 @@ public class HqlTaskStore implements TaskStore {
 
     @Override
     public List<Task> findAll() {
-        return store.query("from Task", Task.class);
+        return store.query("from Task f join fetch f.priority", Task.class);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class HqlTaskStore implements TaskStore {
 
     @Override
     public List<Task> findByDone(boolean done) {
-       return store.query("from Task where done = :fDone",
+       return store.query("from Task f join fetch f.priority where done = :fDone",
                Task.class, Map.of("fDone", done));
     }
 
