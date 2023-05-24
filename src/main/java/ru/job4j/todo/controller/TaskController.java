@@ -6,9 +6,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.todo.model.Category;
 import ru.job4j.todo.model.Task;
+import ru.job4j.todo.model.User;
 import ru.job4j.todo.service.CategoryService;
 import ru.job4j.todo.service.PriorityService;
 import ru.job4j.todo.service.TaskService;
+import ru.job4j.todo.util.TimeZoneConverter;
 
 import java.util.List;
 
@@ -21,46 +23,50 @@ public class TaskController {
     private final CategoryService categoryService;
 
     @GetMapping({"/", "tasks/list"})
-    public String getAll(Model model) {
+    public String getAll(Model model, @SessionAttribute User user) {
         var list = service.findAll();
         if (list.isEmpty()) {
             model.addAttribute("message", "Задач нет");
             return "tasks/list";
         }
-        model.addAttribute("tasks", service.findAll());
+        list.forEach(tsk -> new TimeZoneConverter().convert(tsk, user));
+        model.addAttribute("tasks", list);
         return "tasks/list";
     }
 
     @GetMapping("tasks/list_new")
-    public String getNew(Model model) {
+    public String getNew(Model model, @SessionAttribute User user) {
         var list = service.findByDone(false);
         if (list.isEmpty()) {
             model.addAttribute("message", "Новых задач нет");
             return "tasks/list";
         }
+        list.forEach(tsk -> new TimeZoneConverter().convert(tsk, user));
         model.addAttribute("tasks", list);
         return "tasks/list";
     }
 
     @GetMapping("tasks/list_done")
-    public String getDone(Model model) {
+    public String getDone(Model model, @SessionAttribute User user) {
         var list = service.findByDone(true);
         if (list.isEmpty()) {
             model.addAttribute("message", "Выполненных задач нет");
             return "tasks/list";
         }
+        list.forEach(tsk -> new TimeZoneConverter().convert(tsk, user));
         model.addAttribute("tasks", list);
         return "tasks/list";
     }
 
     @GetMapping("tasks/one/{id}")
-    public String getOne(@PathVariable int id, Model model) {
+    public String getOne(@PathVariable int id, Model model, @SessionAttribute User user) {
         var taskOptional = service.findById(id);
         if (taskOptional.isEmpty()) {
             model.addAttribute("message", "Что-то пошло не так");
             return "errors/404";
         }
         var task = taskOptional.get();
+        new TimeZoneConverter().convert(task, user);
         model.addAttribute("task", task);
         model.addAttribute("categories", categoryService.findAll());
         var priority = priorityService.findById(task.getPriority().getId());
