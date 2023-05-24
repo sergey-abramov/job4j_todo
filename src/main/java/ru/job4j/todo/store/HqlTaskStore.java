@@ -32,18 +32,34 @@ public class HqlTaskStore implements TaskStore {
 
     @Override
     public List<Task> findAll() {
-        return store.query("from Task f join fetch f.priority", Task.class);
+        return store.query("""
+                        select distinct f from Task f
+                        left join fetch f.priority
+                        left join fetch f.participates
+                        order by f.id
+                        """,
+                Task.class);
     }
 
     @Override
     public Optional<Task> findById(int id) {
-       return store.optional("from Task where id = :fId",
+       return store.optional("""
+                       from Task f
+                       left join fetch f.priority
+                       left join fetch f.participates
+                       where f.id = :fId
+                       """,
                Task.class, Map.of("fId", id));
     }
 
     @Override
     public List<Task> findByDone(boolean done) {
-       return store.query("from Task f join fetch f.priority where done = :fDone",
+       return store.query("""
+                        select distinct f from Task f
+                        left join fetch f.priority
+                        left join fetch f.participates
+                        where f.done = :fDone
+                        """,
                Task.class, Map.of("fDone", done));
     }
 

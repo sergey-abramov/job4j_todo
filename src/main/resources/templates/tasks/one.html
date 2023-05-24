@@ -36,6 +36,15 @@
             <div class="mb-3">
                 <p><h6>Дата создания:</h6><engl th:text="*{#temporals.format(created, 'dd-MM-yyyy HH:mm')}"></engl></p>
             </div>
+            <div class="mb-3" th:if="${message}">
+                <p><h6>Приоритет:</h6><engl class="text-danger" th:text="${message}"></engl></p>
+            </div>
+            <div class="mb-3" th:if="${priority}">
+                <p><h6>Приоритет:</h6><engl th:text="${priority.name}"></engl></p>
+            </div>
+            <div class="mb-3">
+                <p><h6>Категории:</h6><ul th:each="category: *{participates}"><li th:text="${category.name}"></li></ul></p>
+            </div>
             <div class="mb-3">
                 <div class="mb-3">
                     <p><h6>Описание:</h6><engl th:text="*{description}"></engl></p>
