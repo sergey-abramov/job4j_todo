@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import ru.job4j.todo.model.Category;
 import ru.job4j.todo.model.Task;
 import ru.job4j.todo.model.User;
 import ru.job4j.todo.service.CategoryService;
@@ -29,7 +28,7 @@ public class TaskController {
             model.addAttribute("message", "Задач нет");
             return "tasks/list";
         }
-        list.forEach(tsk -> new TimeZoneConverter().convert(tsk, user));
+        list.forEach(tsk -> TimeZoneConverter.convert(tsk, user));
         model.addAttribute("tasks", list);
         return "tasks/list";
     }
@@ -41,7 +40,7 @@ public class TaskController {
             model.addAttribute("message", "Новых задач нет");
             return "tasks/list";
         }
-        list.forEach(tsk -> new TimeZoneConverter().convert(tsk, user));
+        list.forEach(tsk -> TimeZoneConverter.convert(tsk, user));
         model.addAttribute("tasks", list);
         return "tasks/list";
     }
@@ -53,7 +52,7 @@ public class TaskController {
             model.addAttribute("message", "Выполненных задач нет");
             return "tasks/list";
         }
-        list.forEach(tsk -> new TimeZoneConverter().convert(tsk, user));
+        list.forEach(tsk -> TimeZoneConverter.convert(tsk, user));
         model.addAttribute("tasks", list);
         return "tasks/list";
     }
@@ -66,7 +65,7 @@ public class TaskController {
             return "errors/404";
         }
         var task = taskOptional.get();
-        new TimeZoneConverter().convert(task, user);
+        TimeZoneConverter.convert(task, user);
         model.addAttribute("task", task);
         model.addAttribute("categories", categoryService.findAll());
         var priority = priorityService.findById(task.getPriority().getId());

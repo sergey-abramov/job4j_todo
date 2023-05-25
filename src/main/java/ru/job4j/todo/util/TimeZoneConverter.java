@@ -6,9 +6,13 @@ import ru.job4j.todo.model.User;
 import java.time.ZoneId;
 import java.util.TimeZone;
 
-public class TimeZoneConverter {
+public final class TimeZoneConverter {
 
-    public void convert(Task task, User user) {
+    private TimeZoneConverter() {
+
+    }
+
+    public static void convert(Task task, User user) {
         if (user.getTimezone() == null) {
             user.setTimezone(TimeZone.getDefault().getID());
         }
